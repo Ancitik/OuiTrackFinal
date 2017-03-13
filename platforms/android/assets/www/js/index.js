@@ -22,7 +22,7 @@ const ouibus_token = 'W9JdZqSu8EAzM5XSf8fCgw';
 
 var outils = {
         getNomVilleParID: function(iden){
-            // On renvoie une promesse qui prend en paramettre une fonction 
+            // On renvoie une promesse qui prend en paramettre une fonction
             // avec 2 paramètres, le callback de succès et d'erreur
             return new Promise(function (resolve, reject) {
                 // Le reste du code ressemble à une méthode AJAX
@@ -48,12 +48,120 @@ var outils = {
                 });
               });
         },
-        
+    
+        getTempsOfCity: function (city){
+            return new Promise(function (resolve, reject) {
+                console.log(city);
+                var cityString = city.split(" ");
+                var citySplit = cityString[0];
+                console.log(citySplit);
+                var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + citySplit + '&appid=7b2f43782488800965332811d430c186&lang=fr';
+
+                /*Initialisation*/
+                var myRequest = new XMLHttpRequest();
+                myRequest.open('GET', url, true);
+
+                /*Envoie des données au script*/
+                myRequest.send();
+
+                /*Attente de la réponse*/
+                myRequest.onreadystatechange = function (aEvt) {
+                    if (myRequest.readyState == 4) { // la requête est terminée
+                        if (myRequest.status == 200) { // Code HTTP 200 OK
+                            var result = JSON.parse(myRequest.responseText);
+                            console.log(result);
+                            console.log(result.weather[0].description);
+                            resolve(result.weather[0].description);
+                        }
+                    }
+                };
+            });
+        },
+    
+        getTemperatureOfCity: function (city){
+            return new Promise(function (resolve, reject) {
+                console.log(city);
+                var cityString = city.split(" ");
+                var citySplit = cityString[0];
+                console.log(citySplit);
+                var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + citySplit + '&appid=7b2f43782488800965332811d430c186&lang=fr';
+
+                /*Initialisation*/
+                var myRequest = new XMLHttpRequest();
+                myRequest.open('GET', url, true);
+
+                /*Envoie des données au script*/
+                myRequest.send();
+
+                /*Attente de la réponse*/
+                myRequest.onreadystatechange = function (aEvt) {
+                    if (myRequest.readyState == 4) { // la requête est terminée
+                        if (myRequest.status == 200) { // Code HTTP 200 OK
+                            var result = JSON.parse(myRequest.responseText);
+                            console.log(result);
+                            console.log(result.main.temp);
+                            resolve((result.main.temp)-273.15);
+                        }
+                    }
+                };
+            });
+        },
+
         executeAsyncFunc: function executeAsyncFunc(d, param) {
-        outils.getNomVilleParID(param).then(function(result){
-			d.innerHTML = result;
-		});  		
-		}
+            outils.getNomVilleParID(param).then(function(result){
+			 d.innerHTML = result;
+		  });
+		},
+    
+        executeAsyncFunc2: function executeAsyncFunc2(d, city) {
+            outils.getTempsOfCity(city).then(function(result){
+                console.log('executeAsyncFunc2 ' + result);
+                document.getElementById(d).textContent = result;
+            });
+		},
+    
+        executeAsyncFunc3: function executeAsyncFunc3(d, city) {
+            outils.getTemperatureOfCity(city).then(function(result){
+                console.log('executeAsyncFunc3 ' + result);
+                document.getElementById(d).textContent = result;
+            });
+		},
+
+        comparerTab: function (numBus, tab) {
+            //FIXME: effacement du mauvais doublon
+        var i;
+        var longueurTab = tab.length;
+        for (i = 0; i < longueurTab; i++) {
+            if (tab[i] == numBus) {
+                return false;
+            }
+        }
+        return true;
+    },
+
+        effacerTableau: function () {
+        var i = 0;
+
+        var lignes = document.getElementById("table").rows;
+        var nbLignes = lignes.length - 1;
+        console.log(lignes);
+        console.log(nbLignes);
+
+        if (nbLignes > 1) {
+            //a l'envers
+            for (i = nbLignes; i > 0; i--) {
+                document.getElementById("table").deleteRow(i);
+            }
+        }
+        //refresh page 1 et redirection
+        $.mobile.changePage('#page1', {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        });
+    },
+    
+
 };
 
 var app = {
@@ -71,6 +179,8 @@ var app = {
         SpinnerPlugin.activityStart("Chargement...", options);
 
         document.getElementById('btnRechercherAvecVilles').addEventListener('click', this.recupererInfoBillet.bind(this), false);
+
+        document.getElementById('btnRechercherNouveauTrajet').addEventListener('click', outils.effacerTableau.bind(this), false);
 
         /*Récupérer les villes dans les selects*/
         var selectVilleDepart = document.getElementById('selectVilleDepart');
@@ -131,71 +241,89 @@ var app = {
                 'Content-Type': 'application/json'
             },
             success: function (result) {
-                var i=0;
-                var j=0;
-                if(result.fares.length===0){
-                    alert('Aucun bilet disponible pour ce trajet à cette date');
-                }
-                else {
+                var i = 0;
+
+                if (result.fares.length === 0) {
+                    alert('aucuns bilets disponibles pour ce trajet ou cette date'); //TODO : remplacer par un spinner loading
+                } else {
                     var i;
-                    for (i = 1; i < result.fares.length; i++){
-                        //TODO : effacer contenu tableau
-                        //deleteRow(i);
+                    var j;
+                    var tab = [];
+                    var ligneActuelle = 1;
+
+                    for (i = 0; i < result.fares.length; i++) {
+                        if (result.fares[i].available === true) {
+                            if (outils.comparerTab(result.fares[i].legs[0].bus_number, tab) == true) {
+
+                                var table = document.getElementById('table');
+                                var ligne = table.insertRow(ligneActuelle);
+                                ligneActuelle++;
+
+                                var num = ligne.insertCell(0);
+                                var dep = ligne.insertCell(1);
+                                var arr = ligne.insertCell(2);
+                                var date = ligne.insertCell(3);
+                                var etape = ligne.insertCell(4);
+
+                                tab.push(result.fares[i].legs[0].bus_number);
+                                console.log(tab);
+
+                                dep.innerHTML = result.fares[i].origin_id;
+                                num.innerHTML = result.fares[i].legs[0].bus_number;
+                                arr.innerHTML = result.fares[i].destination_id;
+                                date.innerHTML = result.fares[i].departure; //TODO : convertir en heure
+
+                                num.innerHTML = '<a href="#page4">' + result.fares[i].legs[0].bus_number + '</a>';
+
+                                //Invoke executeAsyncFunc to edit dep & arr innerHTML
+                                outils.executeAsyncFunc(dep, result.fares[i].origin_id);
+                                outils.executeAsyncFunc(arr, result.fares[i].destination_id);
+
+                                var etapes = '';
+                                for (j = 0; j < result.fares[i].legs.length; j++) {
+                                    etapes = etapes + result.fares[i].legs[j].destination_id + "-";
+                                }
+                                etape.innerHTML = etapes;
+
+                                var heureDep = result.fares[i].departure;
+                                var heureDepSplit = heureDep.split("T");
+                                var heureDepSplit2 = heureDepSplit[1];
+                                var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
+                                date.innerHTML = heureDepSplit3;
+                            }  
+                        }
                     }
-
-                    for (i = 0; i < result.fares.length; i++){
-                        if (result.fares[i].available === true){
-                            var table = document.getElementById('table');
-                            var ligne = table.insertRow(i+1);
-
-                            var num = ligne.insertCell(0);
-                            var dep = ligne.insertCell(1);
-                            var arr = ligne.insertCell(2);
-                            var date = ligne.insertCell(3);
-                            var etape = ligne.insertCell(4);
-                            
-                            dep.innerHTML = result.fares[i].origin_id;
-                            num.innerHTML = result.fares[i].legs[0].bus_number;
-                            arr.innerHTML = result.fares[i].destination_id;
-                            date.innerHTML = result.fares[i].departure; //TODO : convertir en heure
-                            
-                            num.innerHTML = '<a href="#page4">'+result.fares[i].legs[0].bus_number+'</a>';
-                            
-                            //Invoke executeAsyncFunc to edit dep & arr innerHTML
-                            outils.executeAsyncFunc(dep, result.fares[i].origin_id);
-                            outils.executeAsyncFunc(arr, result.fares[i].destination_id);
-
-                            var etapes = '';
-                            for (j = 0; j < result.fares[i].legs.length; j++){
-                                etapes = etapes + result.fares[i].legs[j].destination_id + "-";
-                            }
-                            etape.innerHTML = etapes;
-
-                            var heureDep = result.fares[i].departure;
-                            var heureDepSplit = heureDep.split("T");
-                            var heureDepSplit2 = heureDepSplit[1];
-                            var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] +  heureDepSplit2[4];
-                            date.innerHTML = heureDepSplit3;
-
-                            //ville depart
-                            document.getElementById("labelVilleDepart").textContent=villeDepart;
-                            document.getElementById("labelDateDepart").textContent=dateDepart;
-
-
-                            //ville arrivée
-                            document.getElementById("labelVilleArrivee").textContent=villeArrivee;
-                            //todo : recupérer la date arrivée
-                            //todo : effacer la page pour que ca fonctionne avec le bouton "chercher un autre trajet"
-                            //document.getElementById("labelDateArrivee").textContent=dateArrivee;
-
-                            //TODO : afficher aussi la liste des étapes 
-                            //document.getElementById("labelVilleDepart").setAttribute("src","img/img2.jpg");  
-                        }                                       
-                    }
-                    $.mobile.changePage('#page3');
+                    //ville depart
+                    var villeDepartPage4;
+                    console.log(villeDepart);
                     
+                    outils.getNomVilleParID(villeDepart).then(function(result){
+                        villeDepartPage4 = result;
+                        console.log("villeDepPage4" + villeDepartPage4);
+                        document.getElementById('labelVilleDepart').textContent = villeDepartPage4;
+                        outils.executeAsyncFunc2('labelTempsDepart', villeDepartPage4);
+                        outils.executeAsyncFunc3('labelTemperatureDepart', villeDepartPage4);
+                        document.getElementById("labelDateDepart").textContent = dateDepart;
+                    });
+
+                    //document.getElementById("labelVilleDepart").textContent = villeDepart;
+                    
+
+                    //ville arrivée
+                    var villeArriveePage4;
+                    
+                    outils.getNomVilleParID(villeArrivee).then(function(result){
+                        villeArriveePage4 = result;
+                        console.log("villeDepPage4" + villeDepartPage4);
+                        document.getElementById('labelVilleArrivee').textContent = villeArriveePage4;
+                        outils.executeAsyncFunc2('labelTempsArrivee', villeArriveePage4);
+                        outils.executeAsyncFunc3('labelTemperatureArrivee', villeArriveePage4);
+                        document.getElementById("labelDateArrivee").textContent = dateDepart;
+                    });
+                    
+
+                    $.mobile.changePage('#page3');
                 }
-                
             },
             error: function (xhr, textStatus, errorThrown) {
                 console.log('Error: ' + textStatus + ' ' + errorThrown);
@@ -206,28 +334,6 @@ var app = {
     },
 
 
-    //Simple methode invoked to build page4
-    getMeteoOfCity: function () {
-        var city = document.getElementById('txtCity').value;
-        var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=7b2f43782488800965332811d430c186';
-
-        /*Initialisation*/
-        var myRequest = new XMLHttpRequest();
-        myRequest.open('GET', url, true);
-
-        /*Envoie des données au script*/
-        myRequest.send();
-
-        /*Attente de la réponse*/
-        myRequest.onreadystatechange = function (aEvt) {
-            if (myRequest.readyState == 4) { // la requête est terminée
-                if (myRequest.status == 200) { // Code HTTP 200 OK
-                    var result = JSON.parse(myRequest.responseText);
-                    document.getElementById('weather_result').textContent = result.weather[0].description;
-                }
-            }
-        };
-    }
 };
 
 app.initialize();

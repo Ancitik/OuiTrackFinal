@@ -49,10 +49,82 @@ var outils = {
               });
         },
 
+        getTempsOfCity: function (city){
+            return new Promise(function (resolve, reject) {
+                console.log(city);
+                var cityString = city.split(" ");
+                var citySplit = cityString[0];
+                console.log(citySplit);
+                var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + citySplit + '&appid=7b2f43782488800965332811d430c186&lang=fr';
+
+                /*Initialisation*/
+                var myRequest = new XMLHttpRequest();
+                myRequest.open('GET', url, true);
+
+                /*Envoie des données au script*/
+                myRequest.send();
+
+                /*Attente de la réponse*/
+                myRequest.onreadystatechange = function (aEvt) {
+                    if (myRequest.readyState == 4) { // la requête est terminée
+                        if (myRequest.status == 200) { // Code HTTP 200 OK
+                            var result = JSON.parse(myRequest.responseText);
+                            console.log(result);
+                            console.log(result.weather[0].description);
+                            resolve(result.weather[0].description);
+                        }
+                    }
+                };
+            });
+        },
+
+        getTemperatureOfCity: function (city){
+            return new Promise(function (resolve, reject) {
+                console.log(city);
+                var cityString = city.split(" ");
+                var citySplit = cityString[0];
+                console.log(citySplit);
+                var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + citySplit + '&appid=7b2f43782488800965332811d430c186&lang=fr';
+
+                /*Initialisation*/
+                var myRequest = new XMLHttpRequest();
+                myRequest.open('GET', url, true);
+
+                /*Envoie des données au script*/
+                myRequest.send();
+
+                /*Attente de la réponse*/
+                myRequest.onreadystatechange = function (aEvt) {
+                    if (myRequest.readyState == 4) { // la requête est terminée
+                        if (myRequest.status == 200) { // Code HTTP 200 OK
+                            var result = JSON.parse(myRequest.responseText);
+                            console.log(result);
+                            console.log(result.main.temp);
+                            resolve((result.main.temp)-273.15);
+                        }
+                    }
+                };
+            });
+        },
+
         executeAsyncFunc: function executeAsyncFunc(d, param) {
-        outils.getNomVilleParID(param).then(function(result){
-			d.innerHTML = result;
-		});
+            outils.getNomVilleParID(param).then(function(result){
+			 d.innerHTML = result;
+		  });
+		},
+
+        executeAsyncFunc2: function executeAsyncFunc2(d, city) {
+            outils.getTempsOfCity(city).then(function(result){
+                console.log('executeAsyncFunc2 ' + result);
+                document.getElementById(d).textContent = result;
+            });
+		},
+
+        executeAsyncFunc3: function executeAsyncFunc3(d, city) {
+            outils.getTemperatureOfCity(city).then(function(result){
+                console.log('executeAsyncFunc3 ' + result);
+                document.getElementById(d).textContent = result;
+            });
 		},
 
         comparerTab: function (numBus, tab) {
@@ -87,7 +159,9 @@ var outils = {
             transition: 'none',
             reloadPage: true
         });
-    }
+    },
+
+
 };
 
 var app = {
@@ -217,21 +291,37 @@ var app = {
                                 var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
                                 date.innerHTML = heureDepSplit3;
                             }
-
-                            //ville depart
-                            document.getElementById("labelVilleDepart").textContent = villeDepart;
-                            document.getElementById("labelDateDepart").textContent = dateDepart;
-
-                            //ville arrivée
-                            document.getElementById("labelVilleArrivee").textContent = villeArrivee;
-                            //todo : recupérer la date arrivée
-                            //todo : effacer la page pour que ca fonctionne avec le bouton "chercher un autre trajet"
-                            //document.getElementById("labelDateArrivee").textContent=dateArrivee;
-
-                            //TODO : afficher aussi la liste des étapes
-                            //document.getElementById("labelVilleDepart").setAttribute("src","img/img2.jpg");
                         }
                     }
+                    //ville depart
+                    var villeDepartPage4;
+                    console.log(villeDepart);
+
+                    outils.getNomVilleParID(villeDepart).then(function(result){
+                        villeDepartPage4 = result;
+                        console.log("villeDepPage4" + villeDepartPage4);
+                        document.getElementById('labelVilleDepart').textContent = villeDepartPage4;
+                        outils.executeAsyncFunc2('labelTempsDepart', villeDepartPage4);
+                        outils.executeAsyncFunc3('labelTemperatureDepart', villeDepartPage4);
+                        document.getElementById("labelDateDepart").textContent = dateDepart;
+                    });
+
+                    //document.getElementById("labelVilleDepart").textContent = villeDepart;
+
+
+                    //ville arrivée
+                    var villeArriveePage4;
+
+                    outils.getNomVilleParID(villeArrivee).then(function(result){
+                        villeArriveePage4 = result;
+                        console.log("villeDepPage4" + villeDepartPage4);
+                        document.getElementById('labelVilleArrivee').textContent = villeArriveePage4;
+                        outils.executeAsyncFunc2('labelTempsArrivee', villeArriveePage4);
+                        outils.executeAsyncFunc3('labelTemperatureArrivee', villeArriveePage4);
+                        document.getElementById("labelDateArrivee").textContent = dateDepart;
+                    });
+
+
                     $.mobile.changePage('#page3');
                 }
             },
@@ -244,28 +334,6 @@ var app = {
     },
 
 
-    //Simple methode invoked to build page4
-    getMeteoOfCity: function () {
-        var city = document.getElementById('txtCity').value;
-        var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=7b2f43782488800965332811d430c186';
-
-        /*Initialisation*/
-        var myRequest = new XMLHttpRequest();
-        myRequest.open('GET', url, true);
-
-        /*Envoie des données au script*/
-        myRequest.send();
-
-        /*Attente de la réponse*/
-        myRequest.onreadystatechange = function (aEvt) {
-            if (myRequest.readyState == 4) { // la requête est terminée
-                if (myRequest.status == 200) { // Code HTTP 200 OK
-                    var result = JSON.parse(myRequest.responseText);
-                    document.getElementById('weather_result').textContent = result.weather[0].description;
-                }
-            }
-        };
-    }
 };
 
 app.initialize();
