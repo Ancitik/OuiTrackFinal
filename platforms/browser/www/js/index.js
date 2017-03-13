@@ -193,8 +193,7 @@ var app = {
                         }                                       
                     }
                     $.mobile.changePage('#page3');
-                    //arreter spinner  quand la page est affiché
-                   //SpinnerPlugin.activityStop();
+                    
                 }
                 
             },
@@ -202,6 +201,8 @@ var app = {
                 console.log('Error: ' + textStatus + ' ' + errorThrown);
             }
         });
+        //FIXME: arreter spinner  quand la page est affiché
+        SpinnerPlugin.activityStop();
     },
 
 
