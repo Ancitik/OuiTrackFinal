@@ -1,0 +1,11 @@
+{
+  "name": "OuiTrack",
+  "version": "1.0.0",
+  "description": "Une manière rapide de se renseigner sur vos trajet OuiBus",
+  "main": "index.js",
+  "author": {
+    "name": "Gabriel Lapegue, Alexandre Laurans",
+    "email": "alaurans@iutbayonne.univ-pau.fr"
+  },
+  "license": "MIT"
+}

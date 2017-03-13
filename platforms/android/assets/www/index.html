@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<!--
+    Licensed to the Apache Software Foundation (ASF) under one
+    or more contributor license agreements.  See the NOTICE file
+    distributed with this work for additional information
+    regarding copyright ownership.  The ASF licenses this file
+    to you under the Apache License, Version 2.0 (the
+    "License"); you may not use this file except in compliance
+    with the License.  You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing,
+    software distributed under the License is distributed on an
+    "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+     KIND, either express or implied.  See the License for the
+    specific language governing permissions and limitations
+    under the License.
+-->
+<html>
+
+<head>
+    <!--
+        Customize this policy to fit your own app's needs. For more guidance, see:
+            https://github.com/apache/cordova-plugin-whitelist/blob/master/README.md#content-security-policy
+        Some notes:
+            * gap: is required only on iOS (when using UIWebView) and is needed for JS->native communication
+            * https://ssl.gstatic.com is required only on Android and is needed for TalkBack to function properly
+            * Disables use of inline scripts in order to mitigate risk of XSS vulnerabilities. To change this:
+                * Enable inline JS: add 'unsafe-inline' to default-src
+        -->
+    <meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data:">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+    <link rel="stylesheet" type="text/css" href="css/index.css">
+    <link rel="stylesheet" type="text/css" href="js/jquery-1.5.0.mobile.min.css">
+    <style>
+        /* For avoiding title truncation in wp8 */
+
+        .ui-header .ui-title {
+            overflow: visible !important;
+        }
+        /* For fixing the absolute position issue for the default cordova gen page*/
+
+        #cjp-accordion1 .app {
+            left: 5px !important;
+            margin: 5px !important;
+            position: relative !important;
+        }
+    </style>
+    <title>OuiTrack</title>
+</head>
+
+<body>
+    <!-- jquery mobile page 1 -->
+    <div data-role="page" id="page1">
+        <div data-role="header">
+            <h1>Accueil</h1> </div>
+        <div role="main" class="ui-content">
+            <h1>Logo</h1>
+            <input type="text" placeholder="Ex : 7896"> <a href="#page2">Vous n'avez pas votre numéro de bus ?</a>
+            <a href="#page4">
+                <button>page4</button>
+            </a>
+        </div>
+        <!-- end of page 1 content -->
+    </div>
+    <!-- end page 1 -->
+    <!-- jquery mobile page 2 -->
+    <div data-role="page" id="page2">
+        <div data-role="header">
+            <h1>Recherche personalisée</h1> </div>
+        <div role="main" class="ui-content"> Ville de départ :
+            <br/>
+            <select name="select" id="selectVilleDepart">
+                <!--Sera initialisé par la requête AJAX-->
+            </select>
+            <br/> Ville d'arrivée :
+            <br/>
+            <select name="select" id="selectVilleArrivee">
+                <!--Sera initialisé par la requête AJAX-->
+            </select>
+            <br/> Date de départ :
+            <br/>
+            <input type="date" id="dateDepart">
+            <br/>
+            <input type="button" id="btnRechercherAvecVilles" value="Rechercher">
+            <br/> </div>
+    </div>
+    <!-- end page 2 -->
+    <!-- jquery mobile page 3 -->
+    <div data-role="page" id="page3">
+        <div data-role="header">
+            <h1>Liste des trajets correspondants</h1> </div>
+        <div role="main" class="ui-content">
+            <table id="table">
+                <tr>
+                    <th>Numéro</th>
+                    <!--href vers page 4-->
+                    <th>Départ</th>
+                    <th>Arrivée</th>
+                    <th>Heure</th>
+                </tr>
+                <!--Sera initialisé par la requête AJAX-->
+            </table>
+        </div>
+        <!-- end of page 3 content -->
+    </div>
+    <!-- end page 3 -->
+    <!-- jquery mobile page 4 -->
+    <div data-role="page" id="page4">
+        <div data-role="header">
+            <h1>Informations relative au trajet</h1> </div>
+        <div role="main" class="ui-content">
+            <div>
+                <!-- ville de départ -->
+                <h3>Ville de départ</h3>
+                <p id="labelVilleDepart">Nom de la ville</p>
+                <p id="labelDateDepart">Date</p> <img id="imgDepart" src="#" />
+                <p id="labelTemperatureDepart">Température</p>
+                <p id="labelTempsDepart">Temps</p>
+            </div>
+            <div>
+                <!-- ville d'arrivée -->
+                <h3>Ville d'arrivée</h3>
+                <p id="labelVilleArrivee">Nom de la ville</p>
+                <p id="labelDateArrivee">Date</p> <img id="imgArrivee" src="#" />
+                <p id="labelTemperatureArrivee">Température</p>
+                <p id="labelTempsArrivee">Temps</p>
+            </div>
+            <a href="#page1">
+                <button>Rechercher un autre trajet</button>
+            </a>
+        </div>
+        <!-- end of page 4 content -->
+    </div>
+    <!-- end page 4 -->
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="js/jquery-1.11.1.min.js" id="cordova-jquery"></script>
+    <script type="text/javascript" id="jqm-trans-disable">
+        /* For having a faster transition */
+        $(document).on("mobileinit", function () {
+            $.mobile.defaultPageTransition = "none";
+            $.mobile.defaultDialogTransition = "none";
+        });
+    </script>
+    <script type="text/javascript" src="js/jquery-1.5.0.mobile.min.js"></script>
+    <script type="text/javascript" src="js/index.js"></script>
+</body>
+
+</html>
