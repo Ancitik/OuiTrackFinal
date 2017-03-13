@@ -22,7 +22,7 @@ const ouibus_token = 'W9JdZqSu8EAzM5XSf8fCgw';
 
 var outils = {
         getNomVilleParID: function(iden){
-            // On renvoie une promesse qui prend en paramettre une fonction 
+            // On renvoie une promesse qui prend en paramettre une fonction
             // avec 2 paramètres, le callback de succès et d'erreur
             return new Promise(function (resolve, reject) {
                 // Le reste du code ressemble à une méthode AJAX
@@ -48,12 +48,46 @@ var outils = {
                 });
               });
         },
-        
+
         executeAsyncFunc: function executeAsyncFunc(d, param) {
         outils.getNomVilleParID(param).then(function(result){
 			d.innerHTML = result;
-		});  		
-		}
+		});
+		},
+
+        comparerTab: function (numBus, tab) {
+            //FIXME: effacement du mauvais doublon
+        var i;
+        var longueurTab = tab.length;
+        for (i = 0; i < longueurTab; i++) {
+            if (tab[i] == numBus) {
+                return false;
+            }
+        }
+        return true;
+    },
+
+        effacerTableau: function () {
+        var i = 0;
+
+        var lignes = document.getElementById("table").rows;
+        var nbLignes = lignes.length - 1;
+        console.log(lignes);
+        console.log(nbLignes);
+
+        if (nbLignes > 1) {
+            //a l'envers
+            for (i = nbLignes; i > 0; i--) {
+                document.getElementById("table").deleteRow(i);
+            }
+        }
+        //refresh page 1 et redirection
+        $.mobile.changePage('#page1', {
+            allowSamePageTransition: true,
+            transition: 'none',
+            reloadPage: true
+        });
+    }
 };
 
 var app = {
@@ -64,13 +98,15 @@ var app = {
 
     //Deviceready Event Handler
     onDeviceReady: function() {
-        //TODO : tester connexion wifi ou 3g
+        //TODO: tester connexion wifi ou 3g
 
         //lancer ici le spinner 1
         var options = { dimBackground: true };
         SpinnerPlugin.activityStart("Chargement...", options);
 
-        document.getElementById('btnRechercherAvecVilles').addEventListener('click', this.recupererInfoBillet.bind(this), false);
+        document.getElementById('btnRechercherAvecNum').addEventListener('click', this.recupererInfoBillet.bind(this), false);
+        document.getElementById('btnRechercherAvecVilles').addEventListener('click', this.recupererTrajets.bind(this), false);
+        document.getElementById('btnRechercherNouveauTrajet').addEventListener('click', outils.effacerTableau.bind(this), false);
 
         /*Récupérer les villes dans les selects*/
         var selectVilleDepart = document.getElementById('selectVilleDepart');
@@ -107,8 +143,70 @@ var app = {
         });
     },
 
-    //Click btnRechercherAvecVilles Event Handler
+    //Click btnRechercherAvecNum Event Handler
     recupererInfoBillet: function () {
+        var numBus = $('#txtNumBus').val();
+        var dateBus = $('#dateDepart1').val();
+
+        if (numBus === '' || dateBus === ''){
+            alert('Remplissez tous les champs !');
+            return;
+        }
+
+        var options = { dimBackground: true };
+        SpinnerPlugin.activityStart("Chargement des informations du billet", options);
+
+        $.ajax({
+            type: 'GET',
+            url: 'https://api.idbus.com/v1/fares?date=' + dateBus,
+            dataType: 'json',
+            headers: {
+                'Authorization': ouibus_token ? `Token ${ouibus_token}` : null,
+                'Content-Type': 'application/json'
+            },
+            success: function (result) {
+                //Recherche du billet
+                var i = 0;
+                for (i = 0; i < result.fares.length; i++){
+                    if (result.fares[i].legs[0].bus_number == numBus){
+                        //Numero trouvé
+                        //Modification du DOM de la page 4 (info billets)
+                        //Depart
+                        outils.executeAsyncFunc(document.getElementById("labelVilleDepart"), result.fares[i].origin_id);
+                        console.log(result.fares[i].departure);
+                        var heureDep = result.fares[i].departure;
+                                var heureDepSplit = heureDep.split("T");
+                                var heureDepSplit2 = heureDepSplit[1];
+                                var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
+                        document.getElementById("labelDateDepart").textContent = heureDepSplit[0] + ' : ' + heureDepSplit3;
+                        //Arrivée
+                        outils.executeAsyncFunc(document.getElementById("labelVilleArrivee"), result.fares[i].destination_id);
+                        var heureDep = result.fares[i].arrival;
+                                var heureDepSplit = heureDep.split("T");
+                                var heureDepSplit2 = heureDepSplit[1];
+                                var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
+                        document.getElementById("labelDateArrivee").textContent = heureDepSplit[0] + ' : ' + heureDepSplit3;
+                        //Afficher le DOM de la page 4
+                        $.mobile.changePage('#page4');
+                        //On arrête dès qu'on a trouvé
+                        break;
+                    }
+                    if (i == result.fares.length){
+                        //Numero non trouvé
+                        alert('Aucun billet disponible pour ce numero de bus');
+                    }
+                }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                console.log('Error: ' + textStatus + ' ' + errorThrown);
+            }
+        });
+
+        SpinnerPlugin.activityStop();
+    },
+
+    //Click btnRechercherAvecVilles Event Handler
+    recupererTrajets: function () {
         var villeDepart = $('#selectVilleDepart').val();
         var villeArrivee = $('#selectVilleArrivee').val();
         var dateDepart = $('#dateDepart').val();
@@ -131,71 +229,73 @@ var app = {
                 'Content-Type': 'application/json'
             },
             success: function (result) {
-                var i=0;
-                var j=0;
-                if(result.fares.length===0){
-                    alert('Aucun bilet disponible pour ce trajet à cette date');
-                }
-                else {
+                var i = 0;
+
+                if (result.fares.length === 0) {
+                    alert('Aucun billet disponible pour ce trajet');
+                } else {
                     var i;
-                    for (i = 1; i < result.fares.length; i++){
-                        //TODO : effacer contenu tableau
-                        //deleteRow(i);
-                    }
+                    var j;
+                    var tab = [];
+                    var ligneActuelle = 1;
 
-                    for (i = 0; i < result.fares.length; i++){
-                        if (result.fares[i].available === true){
-                            var table = document.getElementById('table');
-                            var ligne = table.insertRow(i+1);
+                    for (i = 0; i < result.fares.length; i++) {
+                        if (result.fares[i].available === true) {
+                            if (outils.comparerTab(result.fares[i].legs[0].bus_number, tab) == true) {
 
-                            var num = ligne.insertCell(0);
-                            var dep = ligne.insertCell(1);
-                            var arr = ligne.insertCell(2);
-                            var date = ligne.insertCell(3);
-                            var etape = ligne.insertCell(4);
-                            
-                            dep.innerHTML = result.fares[i].origin_id;
-                            num.innerHTML = result.fares[i].legs[0].bus_number;
-                            arr.innerHTML = result.fares[i].destination_id;
-                            date.innerHTML = result.fares[i].departure; //TODO : convertir en heure
-                            
-                            num.innerHTML = '<a href="#page4">'+result.fares[i].legs[0].bus_number+'</a>';
-                            
-                            //Invoke executeAsyncFunc to edit dep & arr innerHTML
-                            outils.executeAsyncFunc(dep, result.fares[i].origin_id);
-                            outils.executeAsyncFunc(arr, result.fares[i].destination_id);
+                                var table = document.getElementById('table');
+                                var ligne = table.insertRow(ligneActuelle);
+                                ligneActuelle++;
 
-                            var etapes = '';
-                            for (j = 0; j < result.fares[i].legs.length; j++){
-                                etapes = etapes + result.fares[i].legs[j].destination_id + "-";
+                                var num = ligne.insertCell(0);
+                                var dep = ligne.insertCell(1);
+                                var arr = ligne.insertCell(2);
+                                var date = ligne.insertCell(3);
+                                var etape = ligne.insertCell(4);
+
+                                tab.push(result.fares[i].legs[0].bus_number);
+                                console.log(tab);
+
+                                dep.innerHTML = result.fares[i].origin_id;
+                                num.innerHTML = result.fares[i].legs[0].bus_number;
+                                arr.innerHTML = result.fares[i].destination_id;
+                                date.innerHTML = result.fares[i].departure; //TODO : convertir en heure
+
+                                num.innerHTML = '<a href="#page4">' + result.fares[i].legs[0].bus_number + '</a>';
+
+                                //Invoke executeAsyncFunc to edit dep & arr innerHTML
+                                outils.executeAsyncFunc(dep, result.fares[i].origin_id);
+                                outils.executeAsyncFunc(arr, result.fares[i].destination_id);
+
+                                var etapes = '';
+                                for (j = 0; j < result.fares[i].legs.length; j++) {
+                                    etapes = etapes + result.fares[i].legs[j].destination_id + "-";
+                                }
+                                etape.innerHTML = etapes;
+
+                                var heureDep = result.fares[i].departure;
+                                var heureDepSplit = heureDep.split("T");
+                                var heureDepSplit2 = heureDepSplit[1];
+                                var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
+                                date.innerHTML = heureDepSplit3;
                             }
-                            etape.innerHTML = etapes;
-
-                            var heureDep = result.fares[i].departure;
-                            var heureDepSplit = heureDep.split("T");
-                            var heureDepSplit2 = heureDepSplit[1];
-                            var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] +  heureDepSplit2[4];
-                            date.innerHTML = heureDepSplit3;
 
                             //ville depart
-                            document.getElementById("labelVilleDepart").textContent=villeDepart;
-                            document.getElementById("labelDateDepart").textContent=dateDepart;
-
+                            document.getElementById("labelVilleDepart").textContent = villeDepart;
+                            document.getElementById("labelDateDepart").textContent = dateDepart;
 
                             //ville arrivée
-                            document.getElementById("labelVilleArrivee").textContent=villeArrivee;
+                            document.getElementById("labelVilleArrivee").textContent = villeArrivee;
                             //todo : recupérer la date arrivée
                             //todo : effacer la page pour que ca fonctionne avec le bouton "chercher un autre trajet"
                             //document.getElementById("labelDateArrivee").textContent=dateArrivee;
 
-                            //TODO : afficher aussi la liste des étapes 
-                            //document.getElementById("labelVilleDepart").setAttribute("src","img/img2.jpg");  
-                        }                                       
+                            //TODO : afficher aussi la liste des étapes
+                            //document.getElementById("labelVilleDepart").setAttribute("src","img/img2.jpg");
+                        }
                     }
                     $.mobile.changePage('#page3');
-                    
                 }
-                
             },
             error: function (xhr, textStatus, errorThrown) {
                 console.log('Error: ' + textStatus + ' ' + errorThrown);
