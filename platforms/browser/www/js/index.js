@@ -48,8 +48,7 @@ var outils = {
                 });
               });
         },
-<<<<<<< HEAD
-    
+
         getTempsOfCity: function (city){
             return new Promise(function (resolve, reject) {
                 console.log(city);
@@ -78,7 +77,7 @@ var outils = {
                 };
             });
         },
-    
+
         getTemperatureOfCity: function (city){
             return new Promise(function (resolve, reject) {
                 console.log(city);
@@ -113,26 +112,19 @@ var outils = {
 			 d.innerHTML = result;
 		  });
 		},
-    
+
         executeAsyncFunc2: function executeAsyncFunc2(d, city) {
             outils.getTempsOfCity(city).then(function(result){
                 console.log('executeAsyncFunc2 ' + result);
                 document.getElementById(d).textContent = result;
             });
 		},
-    
+
         executeAsyncFunc3: function executeAsyncFunc3(d, city) {
             outils.getTemperatureOfCity(city).then(function(result){
                 console.log('executeAsyncFunc3 ' + result);
                 document.getElementById(d).textContent = result;
             });
-=======
-
-        executeAsyncFunc: function executeAsyncFunc(d, param) {
-        outils.getNomVilleParID(param).then(function(result){
-			d.innerHTML = result;
-		});
->>>>>>> b3c99d6047b1a47751c1cff4f7c4511f4e651447
 		},
 
         comparerTab: function (numBus, tab) {
@@ -162,18 +154,14 @@ var outils = {
             }
         }
         //refresh page 1 et redirection
-        $.mobile.changePage('#page1', {
-            allowSamePageTransition: true,
-            transition: 'none',
-            reloadPage: true
-        });
-<<<<<<< HEAD
-    },
-    
 
-=======
-    }
->>>>>>> b3c99d6047b1a47751c1cff4f7c4511f4e651447
+
+        $.mobile.changePage('#page1');
+        location.reload();
+
+    },
+
+
 };
 
 var app = {
@@ -185,6 +173,8 @@ var app = {
     //Deviceready Event Handler
     onDeviceReady: function() {
         //TODO: tester connexion wifi ou 3g
+        document.addEventListener("online", onOnline, false);
+        document.addEventListener("offline", onOffline, false)
 
         //lancer ici le spinner 1
         var options = { dimBackground: true };
@@ -192,8 +182,6 @@ var app = {
 
         document.getElementById('btnRechercherAvecNum').addEventListener('click', this.recupererInfoBillet.bind(this), false);
         document.getElementById('btnRechercherAvecVilles').addEventListener('click', this.recupererTrajets.bind(this), false);
-        document.getElementById('btnRechercherNouveauTrajet').addEventListener('click', outils.effacerTableau.bind(this), false);
-
         document.getElementById('btnRechercherNouveauTrajet').addEventListener('click', outils.effacerTableau.bind(this), false);
 
         /*Récupérer les villes dans les selects*/
@@ -274,6 +262,20 @@ var app = {
                                 var heureDepSplit2 = heureDepSplit[1];
                                 var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
                         document.getElementById("labelDateArrivee").textContent = heureDepSplit[0] + ' : ' + heureDepSplit3;
+
+                     
+                        outils.getNomVilleParID(result.fares[i].origin_id).then(function(result){
+                            var villeDepartPage4 = result;
+                            outils.executeAsyncFunc2('labelTempsDepart', villeDepartPage4);
+                            outils.executeAsyncFunc3('labelTemperatureDepart', villeDepartPage4);
+                        });
+
+                        outils.getNomVilleParID(result.fares[i].destination_id).then(function(result){
+                            var villeDepartPage4 = result;
+                            outils.executeAsyncFunc2('labelTempsArrivee', villeDepartPage4);
+                            outils.executeAsyncFunc3('labelTemperatureArrivee', villeDepartPage4);
+                        });
+
                         //Afficher le DOM de la page 4
                         $.mobile.changePage('#page4');
                         //On arrête dès qu'on a trouvé
@@ -320,11 +322,7 @@ var app = {
                 var i = 0;
 
                 if (result.fares.length === 0) {
-<<<<<<< HEAD
-                    alert('aucuns bilets disponibles pour ce trajet ou cette date'); //TODO : remplacer par un spinner loading
-=======
                     alert('Aucun billet disponible pour ce trajet');
->>>>>>> b3c99d6047b1a47751c1cff4f7c4511f4e651447
                 } else {
                     var i;
                     var j;
@@ -333,8 +331,7 @@ var app = {
 
                     for (i = 0; i < result.fares.length; i++) {
                         if (result.fares[i].available === true) {
-                            if (outils.comparerTab(result.fares[i].legs[0].bus_number, tab) == true) {
-<<<<<<< HEAD
+                            if (outils.comparerTab(result.fares[i].legs[0].bus_number, tab) === true) {
 
                                 var table = document.getElementById('table');
                                 var ligne = table.insertRow(ligneActuelle);
@@ -349,78 +346,12 @@ var app = {
                                 tab.push(result.fares[i].legs[0].bus_number);
                                 console.log(tab);
 
-=======
-
-                                var table = document.getElementById('table');
-                                var ligne = table.insertRow(ligneActuelle);
-                                ligneActuelle++;
-
-                                var num = ligne.insertCell(0);
-                                var dep = ligne.insertCell(1);
-                                var arr = ligne.insertCell(2);
-                                var date = ligne.insertCell(3);
-                                var etape = ligne.insertCell(4);
-
-                                tab.push(result.fares[i].legs[0].bus_number);
-                                console.log(tab);
-
->>>>>>> b3c99d6047b1a47751c1cff4f7c4511f4e651447
                                 dep.innerHTML = result.fares[i].origin_id;
                                 num.innerHTML = result.fares[i].legs[0].bus_number;
                                 arr.innerHTML = result.fares[i].destination_id;
                                 date.innerHTML = result.fares[i].departure; //TODO : convertir en heure
 
                                 num.innerHTML = '<a href="#page4">' + result.fares[i].legs[0].bus_number + '</a>';
-<<<<<<< HEAD
-
-                                //Invoke executeAsyncFunc to edit dep & arr innerHTML
-                                outils.executeAsyncFunc(dep, result.fares[i].origin_id);
-                                outils.executeAsyncFunc(arr, result.fares[i].destination_id);
-
-                                var etapes = '';
-                                for (j = 0; j < result.fares[i].legs.length; j++) {
-                                    etapes = etapes + result.fares[i].legs[j].destination_id + "-";
-                                }
-                                etape.innerHTML = etapes;
-
-                                var heureDep = result.fares[i].departure;
-                                var heureDepSplit = heureDep.split("T");
-                                var heureDepSplit2 = heureDepSplit[1];
-                                var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
-                                date.innerHTML = heureDepSplit3;
-                            }  
-                        }
-                    }
-                    //ville depart
-                    var villeDepartPage4;
-                    console.log(villeDepart);
-                    
-                    outils.getNomVilleParID(villeDepart).then(function(result){
-                        villeDepartPage4 = result;
-                        console.log("villeDepPage4" + villeDepartPage4);
-                        document.getElementById('labelVilleDepart').textContent = villeDepartPage4;
-                        outils.executeAsyncFunc2('labelTempsDepart', villeDepartPage4);
-                        outils.executeAsyncFunc3('labelTemperatureDepart', villeDepartPage4);
-                        document.getElementById("labelDateDepart").textContent = dateDepart;
-                    });
-
-                    //document.getElementById("labelVilleDepart").textContent = villeDepart;
-                    
-
-                    //ville arrivée
-                    var villeArriveePage4;
-                    
-                    outils.getNomVilleParID(villeArrivee).then(function(result){
-                        villeArriveePage4 = result;
-                        console.log("villeDepPage4" + villeDepartPage4);
-                        document.getElementById('labelVilleArrivee').textContent = villeArriveePage4;
-                        outils.executeAsyncFunc2('labelTempsArrivee', villeArriveePage4);
-                        outils.executeAsyncFunc3('labelTemperatureArrivee', villeArriveePage4);
-                        document.getElementById("labelDateArrivee").textContent = dateDepart;
-                    });
-                    
-
-=======
 
                                 //Invoke executeAsyncFunc to edit dep & arr innerHTML
                                 outils.executeAsyncFunc(dep, result.fares[i].origin_id);
@@ -438,22 +369,35 @@ var app = {
                                 var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
                                 date.innerHTML = heureDepSplit3;
                             }
-
-                            //ville depart
-                            document.getElementById("labelVilleDepart").textContent = villeDepart;
-                            document.getElementById("labelDateDepart").textContent = dateDepart;
-
-                            //ville arrivée
-                            document.getElementById("labelVilleArrivee").textContent = villeArrivee;
-                            //todo : recupérer la date arrivée
-                            //todo : effacer la page pour que ca fonctionne avec le bouton "chercher un autre trajet"
-                            //document.getElementById("labelDateArrivee").textContent=dateArrivee;
-
-                            //TODO : afficher aussi la liste des étapes
-                            //document.getElementById("labelVilleDepart").setAttribute("src","img/img2.jpg");
                         }
                     }
->>>>>>> b3c99d6047b1a47751c1cff4f7c4511f4e651447
+                    //ville depart
+                    console.log(villeDepart);
+
+                    outils.getNomVilleParID(villeDepart).then(function(result){
+                        var villeDepartPage4 = result;
+                        console.log("villeDepPage4" + villeDepartPage4);
+                        document.getElementById('labelVilleDepart').textContent = villeDepartPage4;
+                        outils.executeAsyncFunc2('labelTempsDepart', villeDepartPage4);
+                        outils.executeAsyncFunc3('labelTemperatureDepart', villeDepartPage4);
+                        document.getElementById("labelDateDepart").textContent = dateDepart;
+                    });
+
+                    //document.getElementById("labelVilleDepart").textContent = villeDepart;
+
+
+                    //ville arrivée
+
+                    outils.getNomVilleParID(villeArrivee).then(function(result){
+                        var villeArriveePage4 = result;
+                        document.getElementById('labelVilleArrivee').textContent = villeArriveePage4;
+                        outils.executeAsyncFunc2('labelTempsArrivee', villeArriveePage4);
+                        outils.executeAsyncFunc3('labelTemperatureArrivee', villeArriveePage4);
+                        //FIXME: recuperer date arrivee
+                        document.getElementById("labelDateArrivee").textContent = dateDepart;
+                    });
+
+
                     $.mobile.changePage('#page3');
                 }
             },
@@ -465,6 +409,17 @@ var app = {
         SpinnerPlugin.activityStop();
     },
 
+    //onOnline Event Handler
+    onOnline: function () {
+        //onOnline
+        console.log('Online');
+    },
+
+    //onOffline Event Handler
+    onOffline: function () {
+        console.log('Offline');
+        alert('Vous êtes hors connexion ! Ressayez plus tard.');
+    },
 
 };
 
