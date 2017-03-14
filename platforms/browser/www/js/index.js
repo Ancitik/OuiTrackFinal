@@ -173,8 +173,8 @@ var app = {
     //Deviceready Event Handler
     onDeviceReady: function() {
         //TODO: tester connexion wifi ou 3g
-        document.addEventListener("online", onOnline, false);
-        document.addEventListener("offline", onOffline, false)
+        document.addEventListener("online", this.onOnline, false);
+        document.addEventListener("offline", this.onOffline, false)
 
         //lancer ici le spinner 1
         var options = { dimBackground: true };
@@ -419,6 +419,7 @@ var app = {
     onOffline: function () {
         console.log('Offline');
         alert('Vous êtes hors connexion ! Ressayez plus tard.');
+        navigator.app.exitApp();
     },
 
 };
