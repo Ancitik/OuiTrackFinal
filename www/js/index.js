@@ -172,14 +172,14 @@ var app = {
 
     //Deviceready Event Handler
     onDeviceReady: function() {
-        //TODO : tester connexion wifi ou 3g
+        //TODO: tester connexion wifi ou 3g
 
         //lancer ici le spinner 1
         var options = { dimBackground: true };
         SpinnerPlugin.activityStart("Chargement...", options);
 
-        document.getElementById('btnRechercherAvecVilles').addEventListener('click', this.recupererInfoBillet.bind(this), false);
-
+        document.getElementById('btnRechercherAvecNum').addEventListener('click', this.recupererInfoBillet.bind(this), false);
+        document.getElementById('btnRechercherAvecVilles').addEventListener('click', this.recupererTrajets.bind(this), false);
         document.getElementById('btnRechercherNouveauTrajet').addEventListener('click', outils.effacerTableau.bind(this), false);
 
         /*Récupérer les villes dans les selects*/
@@ -217,8 +217,70 @@ var app = {
         });
     },
 
-    //Click btnRechercherAvecVilles Event Handler
+    //Click btnRechercherAvecNum Event Handler
     recupererInfoBillet: function () {
+        var numBus = $('#txtNumBus').val();
+        var dateBus = $('#dateDepart1').val();
+
+        if (numBus === '' || dateBus === ''){
+            alert('Remplissez tous les champs !');
+            return;
+        }
+
+        var options = { dimBackground: true };
+        SpinnerPlugin.activityStart("Chargement des informations du billet", options);
+
+        $.ajax({
+            type: 'GET',
+            url: 'https://api.idbus.com/v1/fares?date=' + dateBus,
+            dataType: 'json',
+            headers: {
+                'Authorization': ouibus_token ? `Token ${ouibus_token}` : null,
+                'Content-Type': 'application/json'
+            },
+            success: function (result) {
+                //Recherche du billet
+                var i = 0;
+                for (i = 0; i < result.fares.length; i++){
+                    if (result.fares[i].legs[0].bus_number == numBus){
+                        //Numero trouvé
+                        //Modification du DOM de la page 4 (info billets)
+                        //Depart
+                        outils.executeAsyncFunc(document.getElementById("labelVilleDepart"), result.fares[i].origin_id);
+                        console.log(result.fares[i].departure);
+                        var heureDep = result.fares[i].departure;
+                                var heureDepSplit = heureDep.split("T");
+                                var heureDepSplit2 = heureDepSplit[1];
+                                var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
+                        document.getElementById("labelDateDepart").textContent = heureDepSplit[0] + ' : ' + heureDepSplit3;
+                        //Arrivée
+                        outils.executeAsyncFunc(document.getElementById("labelVilleArrivee"), result.fares[i].destination_id);
+                        var heureDep = result.fares[i].arrival;
+                                var heureDepSplit = heureDep.split("T");
+                                var heureDepSplit2 = heureDepSplit[1];
+                                var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
+                        document.getElementById("labelDateArrivee").textContent = heureDepSplit[0] + ' : ' + heureDepSplit3;
+                        //Afficher le DOM de la page 4
+                        $.mobile.changePage('#page4');
+                        //On arrête dès qu'on a trouvé
+                        break;
+                    }
+                    if (i == result.fares.length){
+                        //Numero non trouvé
+                        alert('Aucun billet disponible pour ce numero de bus');
+                    }
+                }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                console.log('Error: ' + textStatus + ' ' + errorThrown);
+            }
+        });
+
+        SpinnerPlugin.activityStop();
+    },
+
+    //Click btnRechercherAvecVilles Event Handler
+    recupererTrajets: function () {
         var villeDepart = $('#selectVilleDepart').val();
         var villeArrivee = $('#selectVilleArrivee').val();
         var dateDepart = $('#dateDepart').val();
@@ -244,7 +306,7 @@ var app = {
                 var i = 0;
 
                 if (result.fares.length === 0) {
-                    alert('aucuns bilets disponibles pour ce trajet ou cette date'); //TODO : remplacer par un spinner loading
+                    alert('Aucun billet disponible pour ce trajet');
                 } else {
                     var i;
                     var j;
