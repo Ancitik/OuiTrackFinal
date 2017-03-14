@@ -12,6 +12,9 @@
         },
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "fr.iutbayonne.ouitrack"
+        },
+        "cordova-plugin-network-information": {
+            "PACKAGE_NAME": "fr.iutbayonne.ouitrack"
         }
     },
     "dependent_plugins": {}

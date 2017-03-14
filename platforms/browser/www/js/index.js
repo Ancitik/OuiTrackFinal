@@ -49,10 +49,82 @@ var outils = {
               });
         },
 
+        getTempsOfCity: function (city){
+            return new Promise(function (resolve, reject) {
+                console.log(city);
+                var cityString = city.split(" ");
+                var citySplit = cityString[0];
+                console.log(citySplit);
+                var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + citySplit + '&appid=7b2f43782488800965332811d430c186&lang=fr';
+
+                /*Initialisation*/
+                var myRequest = new XMLHttpRequest();
+                myRequest.open('GET', url, true);
+
+                /*Envoie des données au script*/
+                myRequest.send();
+
+                /*Attente de la réponse*/
+                myRequest.onreadystatechange = function (aEvt) {
+                    if (myRequest.readyState == 4) { // la requête est terminée
+                        if (myRequest.status == 200) { // Code HTTP 200 OK
+                            var result = JSON.parse(myRequest.responseText);
+                            console.log(result);
+                            console.log(result.weather[0].description);
+                            resolve(result.weather[0].description);
+                        }
+                    }
+                };
+            });
+        },
+
+        getTemperatureOfCity: function (city){
+            return new Promise(function (resolve, reject) {
+                console.log(city);
+                var cityString = city.split(" ");
+                var citySplit = cityString[0];
+                console.log(citySplit);
+                var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + citySplit + '&appid=7b2f43782488800965332811d430c186&lang=fr';
+
+                /*Initialisation*/
+                var myRequest = new XMLHttpRequest();
+                myRequest.open('GET', url, true);
+
+                /*Envoie des données au script*/
+                myRequest.send();
+
+                /*Attente de la réponse*/
+                myRequest.onreadystatechange = function (aEvt) {
+                    if (myRequest.readyState == 4) { // la requête est terminée
+                        if (myRequest.status == 200) { // Code HTTP 200 OK
+                            var result = JSON.parse(myRequest.responseText);
+                            console.log(result);
+                            console.log(result.main.temp);
+                            resolve((result.main.temp)-273.15);
+                        }
+                    }
+                };
+            });
+        },
+
         executeAsyncFunc: function executeAsyncFunc(d, param) {
-        outils.getNomVilleParID(param).then(function(result){
-			d.innerHTML = result;
-		});
+            outils.getNomVilleParID(param).then(function(result){
+			 d.innerHTML = result;
+		  });
+		},
+
+        executeAsyncFunc2: function executeAsyncFunc2(d, city) {
+            outils.getTempsOfCity(city).then(function(result){
+                console.log('executeAsyncFunc2 ' + result);
+                document.getElementById(d).textContent = result;
+            });
+		},
+
+        executeAsyncFunc3: function executeAsyncFunc3(d, city) {
+            outils.getTemperatureOfCity(city).then(function(result){
+                console.log('executeAsyncFunc3 ' + result);
+                document.getElementById(d).textContent = result;
+            });
 		},
 
         comparerTab: function (numBus, tab) {
@@ -82,12 +154,14 @@ var outils = {
             }
         }
         //refresh page 1 et redirection
-        $.mobile.changePage('#page1', {
-            allowSamePageTransition: true,
-            transition: 'none',
-            reloadPage: true
-        });
-    }
+
+
+        $.mobile.changePage('#page1');
+        location.reload();
+
+    },
+
+
 };
 
 var app = {
@@ -99,6 +173,8 @@ var app = {
     //Deviceready Event Handler
     onDeviceReady: function() {
         //TODO: tester connexion wifi ou 3g
+        document.addEventListener("online", onOnline, false);
+        document.addEventListener("offline", onOffline, false)
 
         //lancer ici le spinner 1
         var options = { dimBackground: true };
@@ -186,6 +262,20 @@ var app = {
                                 var heureDepSplit2 = heureDepSplit[1];
                                 var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
                         document.getElementById("labelDateArrivee").textContent = heureDepSplit[0] + ' : ' + heureDepSplit3;
+
+                     
+                        outils.getNomVilleParID(result.fares[i].origin_id).then(function(result){
+                            var villeDepartPage4 = result;
+                            outils.executeAsyncFunc2('labelTempsDepart', villeDepartPage4);
+                            outils.executeAsyncFunc3('labelTemperatureDepart', villeDepartPage4);
+                        });
+
+                        outils.getNomVilleParID(result.fares[i].destination_id).then(function(result){
+                            var villeDepartPage4 = result;
+                            outils.executeAsyncFunc2('labelTempsArrivee', villeDepartPage4);
+                            outils.executeAsyncFunc3('labelTemperatureArrivee', villeDepartPage4);
+                        });
+
                         //Afficher le DOM de la page 4
                         $.mobile.changePage('#page4');
                         //On arrête dès qu'on a trouvé
@@ -241,7 +331,7 @@ var app = {
 
                     for (i = 0; i < result.fares.length; i++) {
                         if (result.fares[i].available === true) {
-                            if (outils.comparerTab(result.fares[i].legs[0].bus_number, tab) == true) {
+                            if (outils.comparerTab(result.fares[i].legs[0].bus_number, tab) === true) {
 
                                 var table = document.getElementById('table');
                                 var ligne = table.insertRow(ligneActuelle);
@@ -279,21 +369,35 @@ var app = {
                                 var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
                                 date.innerHTML = heureDepSplit3;
                             }
-
-                            //ville depart
-                            document.getElementById("labelVilleDepart").textContent = villeDepart;
-                            document.getElementById("labelDateDepart").textContent = dateDepart;
-
-                            //ville arrivée
-                            document.getElementById("labelVilleArrivee").textContent = villeArrivee;
-                            //todo : recupérer la date arrivée
-                            //todo : effacer la page pour que ca fonctionne avec le bouton "chercher un autre trajet"
-                            //document.getElementById("labelDateArrivee").textContent=dateArrivee;
-
-                            //TODO : afficher aussi la liste des étapes
-                            //document.getElementById("labelVilleDepart").setAttribute("src","img/img2.jpg");
                         }
                     }
+                    //ville depart
+                    console.log(villeDepart);
+
+                    outils.getNomVilleParID(villeDepart).then(function(result){
+                        var villeDepartPage4 = result;
+                        console.log("villeDepPage4" + villeDepartPage4);
+                        document.getElementById('labelVilleDepart').textContent = villeDepartPage4;
+                        outils.executeAsyncFunc2('labelTempsDepart', villeDepartPage4);
+                        outils.executeAsyncFunc3('labelTemperatureDepart', villeDepartPage4);
+                        document.getElementById("labelDateDepart").textContent = dateDepart;
+                    });
+
+                    //document.getElementById("labelVilleDepart").textContent = villeDepart;
+
+
+                    //ville arrivée
+
+                    outils.getNomVilleParID(villeArrivee).then(function(result){
+                        var villeArriveePage4 = result;
+                        document.getElementById('labelVilleArrivee').textContent = villeArriveePage4;
+                        outils.executeAsyncFunc2('labelTempsArrivee', villeArriveePage4);
+                        outils.executeAsyncFunc3('labelTemperatureArrivee', villeArriveePage4);
+                        //FIXME: recuperer date arrivee
+                        document.getElementById("labelDateArrivee").textContent = dateDepart;
+                    });
+
+
                     $.mobile.changePage('#page3');
                 }
             },
@@ -305,29 +409,18 @@ var app = {
         SpinnerPlugin.activityStop();
     },
 
+    //onOnline Event Handler
+    onOnline: function () {
+        //onOnline
+        console.log('Online');
+    },
 
-    //Simple methode invoked to build page4
-    getMeteoOfCity: function () {
-        var city = document.getElementById('txtCity').value;
-        var url = 'http://api.openweathermap.org/data/2.5/weather?q=' + city + '&appid=7b2f43782488800965332811d430c186';
+    //onOffline Event Handler
+    onOffline: function () {
+        console.log('Offline');
+        alert('Vous êtes hors connexion ! Ressayez plus tard.');
+    },
 
-        /*Initialisation*/
-        var myRequest = new XMLHttpRequest();
-        myRequest.open('GET', url, true);
-
-        /*Envoie des données au script*/
-        myRequest.send();
-
-        /*Attente de la réponse*/
-        myRequest.onreadystatechange = function (aEvt) {
-            if (myRequest.readyState == 4) { // la requête est terminée
-                if (myRequest.status == 200) { // Code HTTP 200 OK
-                    var result = JSON.parse(myRequest.responseText);
-                    document.getElementById('weather_result').textContent = result.weather[0].description;
-                }
-            }
-        };
-    }
 };
 
 app.initialize();
