@@ -368,6 +368,8 @@ var app = {
                                 var heureDepSplit2 = heureDepSplit[1];
                                 var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
                                 date.innerHTML = heureDepSplit3;
+
+                                document.addEventListener('backbutton', outils.effacerTableau(), false);
                             }
                         }
                     }

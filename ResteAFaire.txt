@@ -1,19 +1,11 @@
-recherche avec num de bus et date
-
-affichage page 1 et appui sur le bouton quitte l'app
+appui sur le bouton quitte l'app
 
 enlever les console.log
 
-page2 : affiche date en français
+page2 : affiche date en franÃ§ais
 
 page3 : spinner et affichage cool
 
-	regler le problème du mauvais bus supprimé de la liste
+	regler le problÃ¨me du mauvais bus supprimÃ¨ de la liste
 
-page4 : affichage et weather map
-	traduction de la description météo (optionnel)
-
-
-
-
-
+page4 : affichage

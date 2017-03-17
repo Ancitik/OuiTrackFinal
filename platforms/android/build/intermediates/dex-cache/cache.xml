@@ -3,12 +3,12 @@
 
     <item
         is-multidex="false"
-        jar="C:\Users\Gab\Desktop\OuiTrackFinal\platforms\android\build\intermediates\exploded-aar\android\CordovaLib\unspecified\debug\jars\classes.jar"
+        jar="C:\Users\Alexa\Desktop\OuiTrack\platforms\android\build\intermediates\exploded-aar\android\CordovaLib\unspecified\debug\jars\classes.jar"
         jumboMode="false"
         optimize="true"
         revision="25.0.2"
-        sha1="79d68b70e2f02123c5a1205261f8c9cc038870de">
-        <dex dex="C:\Users\Gab\Desktop\OuiTrackFinal\platforms\android\build\intermediates\pre-dexed\debug\CordovaLib-unspecified-debug_f90445a6026d12d92725a18477ffa335792cb4c4.jar" />
+        sha1="afe8eb4906b94df000e2b3714c864ec42d4e4ea6">
+        <dex dex="C:\Users\Alexa\Desktop\OuiTrack\platforms\android\build\intermediates\pre-dexed\debug\CordovaLib-unspecified-debug_a3badbb685ce2116096b0e7fd1f46574699e4277.jar" />
     </item>
 
 </items>
