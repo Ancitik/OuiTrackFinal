@@ -123,12 +123,11 @@ var outils = {
         executeAsyncFunc3: function executeAsyncFunc3(d, city) {
             outils.getTemperatureOfCity(city).then(function(result){
                 console.log('executeAsyncFunc3 ' + result);
-                document.getElementById(d).textContent = result;
+                document.getElementById(d).textContent = Math.round(result) + "°C";
             });
 		},
 
         comparerTab: function (numBus, tab) {
-            //FIXME: effacement du mauvais doublon
         var i;
         var longueurTab = tab.length;
         for (i = 0; i < longueurTab; i++) {
@@ -172,7 +171,6 @@ var app = {
 
     //Deviceready Event Handler
     onDeviceReady: function() {
-        //TODO: tester connexion wifi ou 3g
         document.addEventListener("online", this.onOnline, false);
         document.addEventListener("offline", this.onOffline, false)
 
@@ -274,6 +272,7 @@ var app = {
                             var villeDepartPage4 = result;
                             outils.executeAsyncFunc2('labelTempsArrivee', villeDepartPage4);
                             outils.executeAsyncFunc3('labelTemperatureArrivee', villeDepartPage4);
+                            SpinnerPlugin.activityStop();
                         });
 
                         //Afficher le DOM de la page 4
@@ -292,7 +291,7 @@ var app = {
             }
         });
 
-        SpinnerPlugin.activityStop();
+        
     },
 
     //Click btnRechercherAvecVilles Event Handler
@@ -328,7 +327,6 @@ var app = {
                     var j;
                     var tab = [];
                     var ligneActuelle = 1;
-
                     for (i = 0; i < result.fares.length; i++) {
                         if (result.fares[i].available === true) {
                             if (outils.comparerTab(result.fares[i].legs[0].bus_number, tab) === true) {
@@ -341,7 +339,6 @@ var app = {
                                 var dep = ligne.insertCell(1);
                                 var arr = ligne.insertCell(2);
                                 var date = ligne.insertCell(3);
-                                var etape = ligne.insertCell(4);
 
                                 tab.push(result.fares[i].legs[0].bus_number);
                                 console.log(tab);
@@ -357,19 +354,11 @@ var app = {
                                 outils.executeAsyncFunc(dep, result.fares[i].origin_id);
                                 outils.executeAsyncFunc(arr, result.fares[i].destination_id);
 
-                                var etapes = '';
-                                for (j = 0; j < result.fares[i].legs.length; j++) {
-                                    etapes = etapes + result.fares[i].legs[j].destination_id + "-";
-                                }
-                                etape.innerHTML = etapes;
-
                                 var heureDep = result.fares[i].departure;
                                 var heureDepSplit = heureDep.split("T");
                                 var heureDepSplit2 = heureDepSplit[1];
                                 var heureDepSplit3 = heureDepSplit2[0] + heureDepSplit2[1] + ":" + heureDepSplit2[3] + heureDepSplit2[4];
                                 date.innerHTML = heureDepSplit3;
-
-                                document.addEventListener('backbutton', outils.effacerTableau(), false);
                             }
                         }
                     }
@@ -387,7 +376,6 @@ var app = {
 
                     //document.getElementById("labelVilleDepart").textContent = villeDepart;
 
-
                     //ville arrivée
 
                     outils.getNomVilleParID(villeArrivee).then(function(result){
@@ -395,8 +383,9 @@ var app = {
                         document.getElementById('labelVilleArrivee').textContent = villeArriveePage4;
                         outils.executeAsyncFunc2('labelTempsArrivee', villeArriveePage4);
                         outils.executeAsyncFunc3('labelTemperatureArrivee', villeArriveePage4);
-                        //FIXME: recuperer date arrivee
                         document.getElementById("labelDateArrivee").textContent = dateDepart;
+                        //FIXME: arreter spinner  quand la page est affiché
+                        SpinnerPlugin.activityStop();
                     });
 
 
@@ -407,8 +396,7 @@ var app = {
                 console.log('Error: ' + textStatus + ' ' + errorThrown);
             }
         });
-        //FIXME: arreter spinner  quand la page est affiché
-        SpinnerPlugin.activityStop();
+        
     },
 
     //onOnline Event Handler

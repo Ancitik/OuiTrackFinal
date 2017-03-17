@@ -1,5 +1,9 @@
 [
     {
+        "merged": "C:\\Users\\Gab\\Desktop\\OuiTrackFinal\\platforms\\android\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi\\icon.png",
+        "source": "C:\\Users\\Gab\\Desktop\\OuiTrackFinal\\platforms\\android\\res\\mipmap-xhdpi\\icon.png"
+    },
+    {
         "merged": "C:\\Users\\Alexa\\Desktop\\OuiTrack\\platforms\\android\\build\\intermediates\\res\\merged\\debug\\mipmap-xhdpi\\icon.png",
         "source": "C:\\Users\\Alexa\\Desktop\\OuiTrack\\platforms\\android\\res\\mipmap-xhdpi\\icon.png"
     }

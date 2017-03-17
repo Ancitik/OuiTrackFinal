@@ -35,7 +35,7 @@
     <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
 
     <link rel="stylesheet" type="text/css" href="js/jquery-1.5.0.mobile.min.css">
-    <!--<link rel="stylesheet" type="text/css" href="css/index.css">-->
+    <link rel="stylesheet" type="text/css" href="css/index.css">
     <style>
         /* For avoiding title truncation in wp8 */
 
@@ -102,7 +102,6 @@
                     <th>Départ</th>
                     <th>Arrivée</th>
                     <th>Heure</th>
-                    <th>Liste des étapes</th>
                     <th></th>
                 </tr>
                 <!--Sera initialisé par la requête AJAX-->
@@ -118,21 +117,26 @@
         <div role="main" class="ui-content">
             <div class="divPage4">
                 <!-- ville de départ -->
+                <center>
                 <h3>Ville de départ</h3>
                 <p id="labelVilleDepart">Nom de la ville</p>
                 <p id="labelDateDepart">Date</p>
-                <img id="imgDepart" src="#" />
+                <!--<img id="imgDepart" src="#" />-->
                 <p id="labelTemperatureDepart">Température</p>
                 <p id="labelTempsDepart">Temps</p>
+                </center>
             </div>
-            <div>
+            <HR>
+            <div class="divPage4">
                 <!-- ville d'arrivée -->
+                <center>
                 <h3>Ville d'arrivée</h3>
                 <p id="labelVilleArrivee">Nom de la ville</p>
                 <p id="labelDateArrivee">Date</p>
-                <img id="imgArrivee" src="#" />
+                <!--<img id="imgArrivee" src="#" />-->
                 <p id="labelTemperatureArrivee">Température</p>
                 <p id="labelTempsArrivee">Temps</p>
+                </center>
             </div>
 
                 <input type="button" id='btnRechercherNouveauTrajet' value="Rechercher un autre trajet" />
