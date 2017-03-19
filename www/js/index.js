@@ -109,18 +109,30 @@ var outils = {
         executeAsyncFunc3: function executeAsyncFunc3(d, city) {
             outils.getTemperatureOfCity(city).then(function(result){
                 console.log('executeAsyncFunc3 ' + result);
+<<<<<<< HEAD
                 document.getElementById(d).textContent = "Température : " + Math.round(result) + "°C";
+=======
+                document.getElementById(d).textContent = Math.round(result) + "°C";
+>>>>>>> d847b0f3a390bbc19f54cd3ed47ed4e6f5139938
             });
 		},
 
         //fonction qui permet de ne pas afficher 2 fois le même trajet (l'APi fournit un même numéro de bus pour un "Paris-Nice" que pour un "Paris-Lyon-Nice")
         comparerTab: function (numBus, tab) {
+<<<<<<< HEAD
             var i;
             var longueurTab = tab.length;
             for (i = 0; i < longueurTab; i++) {
                 if (tab[i] == numBus) {
                     return false;
                 }
+=======
+        var i;
+        var longueurTab = tab.length;
+        for (i = 0; i < longueurTab; i++) {
+            if (tab[i] == numBus) {
+                return false;
+>>>>>>> d847b0f3a390bbc19f54cd3ed47ed4e6f5139938
             }
             return true;
     },
@@ -320,7 +332,10 @@ var app = {
                     var j;
                     var tab = [];
                     var ligneActuelle = 1;
+<<<<<<< HEAD
                     //pour chaque trajet trouvé
+=======
+>>>>>>> d847b0f3a390bbc19f54cd3ed47ed4e6f5139938
                     for (i = 0; i < result.fares.length; i++) {
                         //si le trajet est encore valable (pas dépassé)
                         if (result.fares[i].available === true) {
@@ -348,8 +363,12 @@ var app = {
                                 //Exécuter la requete executeAsyncFunc pour éditer le DOM de la page 4
                                 outils.executeAsyncFunc(dep, result.fares[i].origin_id);
                                 outils.executeAsyncFunc(arr, result.fares[i].destination_id);
+<<<<<<< HEAD
                                 
                                 //on fait un travail de découpage sur la date récupéré
+=======
+
+>>>>>>> d847b0f3a390bbc19f54cd3ed47ed4e6f5139938
                                 var heureDep = result.fares[i].departure;
                                 var heureDepSplit = heureDep.split("T");
                                 var heureDepSplit2 = heureDepSplit[1];
@@ -368,6 +387,11 @@ var app = {
                         document.getElementById("labelDateDepart").textContent = dateDepart;
                     });
 
+<<<<<<< HEAD
+=======
+                    //document.getElementById("labelVilleDepart").textContent = villeDepart;
+
+>>>>>>> d847b0f3a390bbc19f54cd3ed47ed4e6f5139938
                     //ville arrivée
                     outils.getNomVilleParID(villeArrivee).then(function(result){
                         var villeArriveePage4 = result;
@@ -375,6 +399,10 @@ var app = {
                         outils.executeAsyncFunc2('labelTempsArrivee', villeArriveePage4);
                         outils.executeAsyncFunc3('labelTemperatureArrivee', villeArriveePage4);
                         document.getElementById("labelDateArrivee").textContent = dateDepart;
+<<<<<<< HEAD
+=======
+                        //FIXME: arreter spinner  quand la page est affiché
+>>>>>>> d847b0f3a390bbc19f54cd3ed47ed4e6f5139938
                         SpinnerPlugin.activityStop();
                     });
 

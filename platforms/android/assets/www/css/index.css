@@ -1,6 +1,15 @@
 .divPage4{
+<<<<<<< HEAD
     width: 90%;
     height: 45%;
     border: black 1px;
     padding: 5px;
+=======
+    margin-left: 5%;
+    margin-right: 5%;
+    margin-bottom: 10px;
+    width : 90%;
+    height: 45%;
+    padding: 2px;  
+>>>>>>> d847b0f3a390bbc19f54cd3ed47ed4e6f5139938
 }
